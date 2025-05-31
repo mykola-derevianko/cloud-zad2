@@ -10,7 +10,7 @@ env:
   CACHE_REPO: derev/lab
 
 jobs:
-  build-and-push:
+  scan-and-build:
     runs-on: ubuntu-latest
 
     permissions:
@@ -37,35 +37,34 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build image and cache
-        id: build
+      # Build for CVE scan (only linux/amd64, not pushed)
+      - name: Build image for CVE scan
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
           file: Dockerfile
-          push: false
-          tags: |
-            ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          platforms: linux/amd64
+          load: true
+          tags: localbuild:test
           cache-from: type=registry,ref=${{ env.CACHE_REPO }}:buildcache
           cache-to: type=registry,ref=${{ env.CACHE_REPO }}:buildcache,mode=max
-          outputs: type=docker,dest=/tmp/image.tar
 
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@0.11.2
         with:
-          input: /tmp/image.tar
+          image-ref: localbuild:test
           format: table
           exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
-      - name: Push image if scan passed
+      # Build multi-platform image and push if scan passed
+      - name: Build and Push multi-arch image
         if: success()
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
