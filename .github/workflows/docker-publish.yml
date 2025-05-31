@@ -53,7 +53,7 @@ jobs:
           outputs: type=oci,dest=/tmp/image-oci
 
       - name: Scan OCI image with Trivy
-        uses: aquasecurity/trivy-action@v0.20.0
+        uses: aquasecurity/trivy-action@master
         with:
           input: /tmp/image-oci
           format: table
