@@ -89,6 +89,8 @@ Obrazy oznaczane są za pomocą:
 
 Łańcuch został uruchomiony w zakładce **Actions** i zakończył się sukcesem. Obraz został wypchnięty do:
 
+![Zrzut](https://i.postimg.cc/GhnTZrqk/image.png)
+
 ```
 ghcr.io/mykola-derevianko/cloud-zad2
 ```
