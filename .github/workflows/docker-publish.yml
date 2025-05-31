@@ -37,30 +37,35 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build image (single arch) and export to tar
+      - name: Build image and cache
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: Dockerfile
-          platforms: linux/amd64
           push: false
-          tags: ${{ env.IMAGE_NAME }}:scan-test
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.CACHE_REPO }}:buildcache
           cache-to: type=registry,ref=${{ env.CACHE_REPO }}:buildcache,mode=max
           outputs: type=docker,dest=/tmp/image.tar
 
-      - name: Install Trivy
-        uses: aquasecurity/setup-trivy@master
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v0.11.2
+        with:
+          input: /tmp/image.tar
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
 
-      - name: Scan image tarball with Trivy
-        run: trivy image --input /tmp/image.tar --severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed --format table
-
-      - name: Build and push multi-arch image to GHCR (only if scan passed)
+      - name: Push image if scan passed
         if: success()
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
