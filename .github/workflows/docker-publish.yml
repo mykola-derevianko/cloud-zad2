@@ -37,31 +37,28 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build image and export as OCI directory
-        id: build
+      - name: Build single-arch image and export to tar
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           file: Dockerfile
           push: false
-          tags: |
-            ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ env.IMAGE_NAME }}:scan-test
           cache-from: type=registry,ref=${{ env.CACHE_REPO }}:buildcache
           cache-to: type=registry,ref=${{ env.CACHE_REPO }}:buildcache,mode=max
-          outputs: type=local,dest=/tmp/image-oci
+          outputs: type=docker,dest=/tmp/image.tar
 
-      - name: Scan OCI image with Trivy
+      - name: Scan image tar with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          input: /tmp/image-oci
+          input: /tmp/image.tar
           format: table
           exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
-      - name: Push image to GHCR (if scan passed)
+      - name: Build and push multi-arch image to GHCR (if scan passed)
         if: success()
         uses: docker/build-push-action@v5
         with:
