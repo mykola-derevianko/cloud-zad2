@@ -50,7 +50,7 @@ jobs:
           outputs: type=docker,dest=/tmp/image.tar
 
       - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.11.2
+        uses: aquasecurity/setup-trivy@master
 
       - name: Scan image tarball with Trivy
         run: trivy image --input /tmp/image.tar --severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed --format table
