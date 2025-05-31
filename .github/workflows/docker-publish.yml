@@ -37,7 +37,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build image and export as OCI tar
+      - name: Build image and export as OCI layout
         id: build
         uses: docker/build-push-action@v5
         with:
@@ -50,12 +50,12 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.CACHE_REPO }}:buildcache
           cache-to: type=registry,ref=${{ env.CACHE_REPO }}:buildcache,mode=max
-          outputs: type=oci,dest=/tmp/image.tar  # ✅ OCI format for multi-arch scan
+          outputs: type=oci,dest=/tmp/image-oci
 
-      - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@master
+      - name: Scan OCI image with Trivy
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
-          input: /tmp/image.tar
+          input: /tmp/image-oci
           format: table
           exit-code: 1
           ignore-unfixed: true
