@@ -50,8 +50,9 @@ jobs:
           outputs: type=docker,dest=/tmp/image.tar
 
       - name: Scan image tar with Trivy
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
+          scan-type: image
           input: /tmp/image.tar
           format: table
           exit-code: 1
