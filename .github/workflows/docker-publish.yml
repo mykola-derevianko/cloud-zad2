@@ -52,11 +52,12 @@ jobs:
       - name: Scan image with Docker Scout
         uses: docker/scout-action@v1
         with:
+          command: cves
           image: ${{ env.IMAGE_NAME }}:scan-test
           dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
           only-severities: critical,high
-          fail-on: critical,high
+          exit-code: 1
 
       - name: Build and push multi-arch image if scan passed
         if: success()
