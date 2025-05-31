@@ -1,4 +1,7 @@
-FROM alpine:latest AS build
+FROM alpine:3.12
+
+RUN apk add --no-cache openssl=1.1.1d-r0
+
 
 RUN apk add --no-cache gcc musl-dev upx
 
