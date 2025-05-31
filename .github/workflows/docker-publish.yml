@@ -37,7 +37,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build image (single arch) and export to tar for scanning
+      - name: Build image (single arch) and export to tar
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -50,9 +50,9 @@ jobs:
           outputs: type=docker,dest=/tmp/image.tar
 
       - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.10.0
+        uses: aquasecurity/setup-trivy@v1
 
-      - name: Scan exported image with Trivy
+      - name: Scan image tarball with Trivy
         run: trivy image --input /tmp/image.tar --severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed --format table
 
       - name: Build and push multi-arch image to GHCR (only if scan passed)
