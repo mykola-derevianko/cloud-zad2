@@ -53,7 +53,7 @@ jobs:
           outputs: type=oci,dest=/tmp/image.tar  # ✅ OCI format for multi-arch scan
 
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@v0.20.0
+        uses: aquasecurity/trivy-action@master
         with:
           input: /tmp/image.tar
           format: table
