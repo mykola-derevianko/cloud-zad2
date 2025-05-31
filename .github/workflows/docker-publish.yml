@@ -50,10 +50,10 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.CACHE_REPO }}:buildcache
           cache-to: type=registry,ref=${{ env.CACHE_REPO }}:buildcache,mode=max
-          outputs: type=oci,dest=/tmp/image.tar
+          outputs: type=oci,dest=/tmp/image.tar  # ✅ OCI format for multi-arch scan
 
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
           input: /tmp/image.tar
           format: table
@@ -61,12 +61,13 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
-      - name: Push image to GHCR
+      - name: Push image to GHCR (if scan passed)
         if: success()
         uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64
+          file: Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
