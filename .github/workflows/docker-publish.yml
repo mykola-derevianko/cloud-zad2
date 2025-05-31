@@ -37,7 +37,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Build for CVE scan (only linux/amd64, not pushed)
+      # Build for CVE scan
       - name: Build image for CVE scan
         uses: docker/build-push-action@v5
         with:
