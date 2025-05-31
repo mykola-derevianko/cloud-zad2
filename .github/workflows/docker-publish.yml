@@ -37,7 +37,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build image and export as OCI layout
+      - name: Build image and export as OCI directory
         id: build
         uses: docker/build-push-action@v5
         with:
@@ -50,7 +50,7 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.CACHE_REPO }}:buildcache
           cache-to: type=registry,ref=${{ env.CACHE_REPO }}:buildcache,mode=max
-          outputs: type=oci,dest=/tmp/image-oci
+          outputs: type=local,dest=/tmp/image-oci
 
       - name: Scan OCI image with Trivy
         uses: aquasecurity/trivy-action@master
